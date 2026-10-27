@@ -1,0 +1,251 @@
+@use 'tokens' as *;
+
+// ---------- App shell ----------
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+
+  @include tablet {
+    gap: 16px;
+    padding: 0 16px 16px;
+  }
+}
+
+// ---------- Header ----------
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid $panel-border;
+  background: $panel;
+  color: $text;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &:hover {
+    border-color: $control-border;
+    background: #211e31;
+  }
+}
+
+.topbar {
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+
+  @include tablet {
+    gap: 12px;
+    padding: 0;
+  }
+  @include desktop {
+    gap: 16px;
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    object-fit: cover;
+    object-position: 50% 30%;
+    border: 2px solid $violet;
+    @include tablet {
+      display: none;
+    }
+  }
+
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1;
+    min-width: 0;
+  }
+
+  &__logo {
+    font-family: $font-display;
+    font-size: clamp(13px, 3.9vw, 15px);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    @include tablet {
+      font-size: 22px;
+    }
+    @include desktop {
+      font-size: 24px;
+    }
+  }
+
+  &__balance-inline {
+    font-size: 12px;
+    color: $text-muted;
+    white-space: nowrap;
+    strong {
+      color: $text;
+    }
+    @include tablet {
+      display: none;
+    }
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__balance {
+    display: none;
+    @include tablet {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 40px;
+      padding: 0 14px;
+      border-radius: 10px;
+      background: $panel;
+      border: 1px solid $panel-border;
+    }
+    @include desktop {
+      padding: 0 16px;
+    }
+  }
+  &__balance-label {
+    font-size: 13px;
+    color: $text-muted;
+  }
+  &__balance-value {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  &__sound {
+    display: none;
+    @include tablet {
+      display: flex;
+    }
+  }
+
+  &__menu {
+    position: relative;
+  }
+  &__dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 20;
+    min-width: 240px;
+    padding: 6px;
+    border-radius: 12px;
+    background: $panel;
+    border: 1px solid $panel-border;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    button {
+      min-height: 44px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: $text;
+      font-size: 14px;
+      text-align: left;
+      &:hover:not(:disabled) {
+        background: $control;
+      }
+    }
+  }
+}
+
+// ---------- Dashboard ----------
+// Mobile: stacked under the scene. Tablet: 2×2 with portrait. PC: one row.
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+
+  @include tablet {
+    flex: 1;
+    display: grid;
+    gap: 16px;
+    padding: 0;
+    // Row 1: bet | auto (halves). Row 2: history | 190px portrait.
+    grid-template-columns: minmax(0, 1fr) minmax(0, calc((100% - 16px) / 2 - 206px)) 190px;
+    grid-template-rows: auto minmax(200px, 1fr);
+    grid-template-areas:
+      'bet cash cash'
+      'hist hist portrait';
+  }
+
+  @include desktop {
+    min-height: 200px;
+    grid-template-columns:
+      // 1440px → 330 / 350 / 1fr / 260 like the mockup; narrower screens
+      // shrink the bet panel and portrait first so the history stays legible.
+      clamp(250px, 23vw, 330px)
+      clamp(340px, 24.3vw, 350px)
+      minmax(0, 1fr)
+      clamp(160px, calc(30vw - 172px), 260px);
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: 'bet cash hist portrait';
+  }
+
+  .panel--bet {
+    grid-area: bet;
+  }
+  .panel--auto {
+    grid-area: cash;
+  }
+  .panel--history {
+    grid-area: hist;
+  }
+  .portrait {
+    grid-area: portrait;
+  }
+}
+
+// ---------- Rules dialog ----------
+.rules {
+  width: min(520px, calc(100vw - 32px));
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid $panel-border;
+  background: $panel;
+  color: $text;
+  line-height: 1.5;
+  &::backdrop {
+    background: rgba(8, 6, 18, 0.7);
+  }
+  h2 {
+    margin: 0 0 12px;
+    font-family: $font-display;
+    font-weight: 400;
+    font-size: 26px;
+  }
+  ol {
+    margin: 0 0 16px;
+    padding-left: 20px;
+  }
+  li + li {
+    margin-top: 6px;
+  }
+  &__note {
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: $text-label;
+  }
+  &__close {
+    width: 100%;
+    height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: $accent;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+}

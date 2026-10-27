@@ -1,0 +1,668 @@
+@use 'tokens' as *;
+
+// The scene keeps each mockup's composition. Overlay geometry is expressed for
+// the mockup's reference height (--h0); --dy re-centres it when the real height
+// differs. The backdrop and crash art are ONE un-mirrored image each, cropped
+// with object-fit: cover (--bg-pos / --crash-pos pick the crop per format).
+.scene {
+  // Mobile — mockup 390 × 500
+  --scene-h: clamp(440px, 128vw, 560px);
+  --h0: 500px;
+  --bg-pos: 50% 50%;
+  --crash-pos: 50% 50%;
+  --oy: 0.418; // zoom target = streak origin (209 / 500)
+  --zoom-amp: 2.2;
+  --streak-y: 209px;
+  --streak-len: 110px;
+  --streak-from: 30px;
+  --streak-travel: 470px;
+  --suit-w: 236px;
+  --suit-top: 206px;
+  --chute-w: 200px;
+  --chute-top: 166px;
+  --launch-y: 190px;
+  --launch-s: 1.55;
+  --center-top: 76px;
+  --shade-h: 180px;
+  --shade-a: 0.55;
+  --dy: calc((var(--scene-h) - var(--h0)) / 2);
+  // Downward drift during the dive. Kept below the overhang created by the zoom
+  // ((z − 1) × oy × H) so the image edge can never come into view.
+  --pan-max: calc(var(--zoom-amp) * 0.4 * var(--oy) * var(--scene-h));
+
+  position: relative;
+  height: var(--scene-h);
+  flex-shrink: 0;
+  overflow: hidden;
+  background: $scene-bg;
+  isolation: isolate;
+
+  // Tablet — mockup 788 × 700
+  @include tablet {
+    --scene-h: clamp(560px, 86vw, 700px);
+    --h0: 700px;
+    --bg-pos: 50% 70%;
+    --crash-pos: 50% 40%;
+    --oy: 0.386; // 270 / 700
+    --streak-y: 270px;
+    --streak-len: 140px;
+    --streak-from: 40px;
+    --streak-travel: 640px;
+    --suit-w: 340px;
+    --suit-top: 286px;
+    --chute-w: 240px;
+    --chute-top: 230px;
+    --launch-y: 240px;
+    --launch-s: 1.6;
+    --center-top: 84px;
+    --shade-h: 220px;
+    border-radius: 14px;
+  }
+
+  // PC — mockup 1408 × 596
+  @include desktop {
+    --scene-h: clamp(520px, calc(100dvh - 304px), 596px);
+    --h0: 596px;
+    // The source art is ~1:1, so a 2.4:1 PC scene only shows a horizontal band
+    // of it. Keep the summit + valley, and zoom less (the art is already ~2× upscaled).
+    --bg-pos: 50% 78%;
+    --crash-pos: 50% 82%;
+    --oy: 0.32; // 190 / 596
+    --zoom-amp: 1.1;
+    --streak-y: 190px;
+    --streak-len: 160px;
+    --streak-travel: 760px;
+    --suit-w: 326px;
+    --suit-top: 206px;
+    --chute-w: 256px;
+    --chute-top: 170px;
+    --launch-y: 260px;
+    --center-top: 36px;
+    --shade-a: 0.5;
+  }
+
+  // ----- Art layers -----
+  &__bg,
+  &__crash-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; // single image, cropped — never stretched, never tiled
+    // On PC the ~700px art is upscaled 2–3×: smooth scaling reads better than
+    // nearest-neighbour blocks at that ratio.
+    @include desktop {
+      image-rendering: auto;
+    }
+  }
+  &__bg {
+    --prog: 0;
+    --settle: 0;
+    object-position: var(--bg-pos);
+    transform-origin: 50% calc(var(--oy) * 100%);
+    transform: translateY(calc(var(--prog) * var(--pan-max)))
+      scale(calc(1 + var(--zoom-amp) * var(--prog) + var(--settle)));
+    will-change: transform;
+  }
+
+  &__vignette {
+    display: none;
+    @include desktop {
+      display: block;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        90deg,
+        rgba(14, 13, 24, 0.55),
+        rgba(14, 13, 24, 0) 22%,
+        rgba(14, 13, 24, 0) 78%,
+        rgba(14, 13, 24, 0.55)
+      );
+    }
+  }
+
+  &__crash {
+    position: absolute;
+    inset: 0;
+  }
+  &__crash-img {
+    object-position: var(--crash-pos);
+  }
+  &__flash {
+    position: absolute;
+    inset: 0;
+    background: #ff2d55;
+    pointer-events: none;
+  }
+
+  &__streaks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  &__streak-axis {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--streak-y) + var(--dy));
+    width: 0;
+    height: 0;
+  }
+  &__streak {
+    position: absolute;
+    left: -1px;
+    top: 0;
+    height: var(--streak-len);
+    border-radius: 2px;
+    background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9));
+  }
+
+  &__flyer,
+  &__chute {
+    position: absolute;
+    left: 50%;
+    margin-left: calc(var(--w) / -2);
+    width: var(--w);
+  }
+  &__flyer {
+    --w: var(--suit-w);
+    top: calc(var(--suit-top) + var(--dy));
+    img {
+      width: 100%;
+      height: auto;
+    }
+  }
+  &__distance {
+    transform-origin: 50% 40%;
+    transition: transform 120ms linear;
+  }
+  &--ready &__distance {
+    transition: none;
+  }
+  &__chute {
+    --w: var(--chute-w);
+    top: calc(var(--chute-top) + var(--dy));
+    img {
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  &__shade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--shade-h);
+    pointer-events: none;
+    background: linear-gradient(rgba(14, 13, 24, var(--shade-a)), rgba(14, 13, 24, 0));
+  }
+
+  // ----- Centre: pills, multiplier, arc -----
+  &__center {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--center-top);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    @include tablet {
+      gap: 10px;
+    }
+  }
+
+  // ----- Bottom overlays -----
+  &__reveal {
+    position: absolute;
+    left: 50%;
+    bottom: 88px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 12px;
+    color: $text;
+    background: rgba(16, 12, 34, 0.85);
+    padding: 6px 12px;
+    border-radius: 999px;
+    @include tablet {
+      bottom: 112px;
+      font-size: 13px;
+      padding: 6px 14px;
+    }
+  }
+
+  &__meta {
+    display: none;
+    @include tablet {
+      position: absolute;
+      left: 16px;
+      bottom: 112px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    @include desktop {
+      left: 20px;
+      bottom: 24px;
+    }
+  }
+  &__chip {
+    font-size: 13px;
+    background: $overlay;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 0;
+    &--link {
+      color: #d4c2ff;
+      min-height: 34px;
+      &:hover {
+        color: #fff;
+      }
+    }
+    &--round {
+      color: $text-label;
+      @include tablet-only {
+        display: none;
+      }
+    }
+  }
+
+  &__auto {
+    position: absolute;
+    right: 12px;
+    bottom: 88px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #e2d4ff;
+    background: rgba(59, 36, 117, 0.9);
+    padding: 6px 10px;
+    border-radius: 8px;
+    @include tablet {
+      right: 16px;
+      bottom: 112px;
+      font-size: 13px;
+      padding: 8px 12px;
+    }
+    @include desktop {
+      right: 20px;
+      bottom: 24px;
+    }
+  }
+  &__auto-long {
+    display: none;
+    @include tablet {
+      display: inline;
+    }
+  }
+  &__auto-short {
+    @include tablet {
+      display: none;
+    }
+  }
+
+  &__action {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 14px;
+    display: flex;
+    justify-content: center;
+    @include tablet {
+      left: 0;
+      right: 0;
+      bottom: 24px;
+    }
+  }
+}
+
+// ---------- HUD (altitude / speed) ----------
+.hud {
+  position: absolute;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: $overlay;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  &--left {
+    left: 12px;
+  }
+  &--right {
+    right: 12px;
+  }
+  @include tablet {
+    top: 16px;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    &--left {
+      left: 16px;
+    }
+    &--right {
+      right: 16px;
+    }
+  }
+  @include desktop {
+    top: 20px;
+    padding: 10px 16px;
+    &--left {
+      left: 20px;
+    }
+    &--right {
+      right: 20px;
+    }
+  }
+
+  &__icon--alt {
+    width: 26px;
+    height: 20px;
+    @include tablet {
+      width: 28px;
+      height: 22px;
+    }
+    @include desktop {
+      width: 30px;
+    }
+  }
+  &__icon--speed {
+    width: 22px;
+    height: 22px;
+    @include tablet {
+      width: 24px;
+      height: 24px;
+    }
+    @include desktop {
+      width: 26px;
+      height: 26px;
+    }
+  }
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    @include tablet {
+      gap: 2px;
+    }
+  }
+  &__label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: $hud-label;
+    @include tablet {
+      font-size: 11px;
+    }
+  }
+  &__value {
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    @include tablet {
+      font-size: 17px;
+    }
+    @include desktop {
+      font-size: 18px;
+    }
+  }
+}
+
+// ---------- Multiplier ----------
+.multiplier {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__value {
+    position: relative;
+    font-family: $font-display;
+    font-size: 60px;
+    line-height: 1;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 18px $violet, 0 0 4px #c4a6ff, 0 4px 0 #2a1458;
+    @include tablet {
+      font-size: 76px;
+      text-shadow: 0 0 22px $violet, 0 0 4px #c4a6ff, 0 5px 0 #2a1458;
+    }
+    @include desktop {
+      font-size: 84px;
+    }
+    .scene--crashed & {
+      color: #ff5c74;
+      text-shadow: 0 0 16px #ff2d55, 0 4px 0 #3a0610;
+      @include tablet {
+        text-shadow: 0 0 18px #ff2d55, 0 5px 0 #3a0610;
+      }
+    }
+  }
+
+  &__burst {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 260px;
+    height: 104px;
+    margin: -52px 0 0 -130px;
+    @include tablet {
+      width: 310px;
+      height: 124px;
+      margin: -62px 0 0 -155px;
+    }
+    @include desktop {
+      width: 340px;
+      height: 136px;
+      margin: -68px 0 0 -170px;
+    }
+  }
+
+  &__sparkles {
+    position: absolute;
+    inset: -30px -46px -14px;
+    @include tablet {
+      inset: -36px -60px -16px;
+    }
+    i {
+      position: absolute;
+      width: var(--s);
+      height: var(--s);
+      background: var(--c);
+      box-shadow: 0 0 12px var(--c);
+      &:nth-child(1) {
+        --s: 12px;
+        --c: #b57bff;
+        left: 4px;
+        top: 18px;
+      }
+      &:nth-child(2) {
+        --s: 14px;
+        --c: #c99bff;
+        right: 6px;
+        top: 6px;
+        animation-delay: 0.3s;
+      }
+      &:nth-child(3) {
+        --s: 9px;
+        --c: #9b5cff;
+        left: 22px;
+        bottom: 0;
+        animation-delay: 0.6s;
+      }
+      &:nth-child(4) {
+        --s: 10px;
+        --c: #b57bff;
+        right: 18px;
+        bottom: 6px;
+        animation-delay: 0.9s;
+      }
+      @include tablet {
+        &:nth-child(1) {
+          --s: 16px;
+          top: 20px;
+        }
+        &:nth-child(2) {
+          --s: 18px;
+        }
+        &:nth-child(3) {
+          --s: 12px;
+          left: 26px;
+        }
+        &:nth-child(4) {
+          --s: 13px;
+          right: 22px;
+        }
+      }
+    }
+  }
+}
+
+.arc {
+  width: 220px;
+  height: 36px;
+  filter: drop-shadow(0 0 6px #a855f7);
+  @include tablet {
+    width: 270px;
+    height: 44px;
+  }
+  @include desktop {
+    width: 300px;
+  }
+  path:last-child {
+    transition: stroke-dasharray 120ms linear;
+  }
+}
+
+// ---------- Pills ----------
+.pill {
+  white-space: nowrap;
+  &--ready {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: $text;
+    background: rgba(16, 12, 34, 0.85);
+    padding: 6px 14px;
+    border-radius: 999px;
+    @include tablet {
+      font-size: 14px;
+      padding: 8px 16px;
+    }
+  }
+  &--cashed {
+    font-family: $font-display;
+    font-size: 22px;
+    color: #fff;
+    background: rgba(42, 20, 88, 0.92);
+    border: 2px solid #b57bff;
+    padding: 4px 16px;
+    border-radius: 10px;
+    box-shadow: 0 0 18px rgba(181, 123, 255, 0.7);
+    @include tablet {
+      font-size: 28px;
+      padding: 4px 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(181, 123, 255, 0.7);
+    }
+  }
+  &--gain {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(16, 12, 34, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 6px 18px;
+    border-radius: 999px;
+    @include tablet {
+      font-size: 18px;
+      padding: 8px 22px;
+    }
+  }
+  &--crash {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ff7a8e;
+    background: rgba(30, 8, 14, 0.92);
+    border: 2px solid $crash;
+    padding: 8px 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 16px rgba(255, 45, 85, 0.6);
+    @include tablet {
+      font-size: 18px;
+      padding: 8px 48px;
+      border-radius: 12px;
+      box-shadow: 0 0 18px rgba(255, 45, 85, 0.6);
+    }
+  }
+}
+
+// ---------- Main action button ----------
+.main-btn {
+  flex: 1;
+  height: 64px;
+  border-radius: 12px;
+  border: 0;
+  color: #fff;
+  background: $accent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.45);
+  transition: transform 80ms ease, box-shadow 80ms ease, background-color 150ms ease;
+
+  @include tablet {
+    flex: 0 0 auto;
+    min-width: 380px;
+    height: 74px;
+    padding: 0 28px;
+    border-radius: 14px;
+    gap: 7px;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.45);
+  }
+  @include desktop {
+    min-width: 400px;
+    height: 76px;
+    padding: 0 32px;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+  }
+  &:disabled {
+    opacity: 0.75;
+  }
+
+  &--cash {
+    background: $cash;
+    color: $cash-text;
+  }
+  &--stop {
+    background: $control;
+  }
+
+  &__label {
+    font-family: $font-display;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    @include tablet {
+      font-size: 27px;
+    }
+    @include desktop {
+      font-size: 28px;
+    }
+  }
+  &__sub {
+    font-size: 13px;
+    font-weight: 500;
+    @include tablet {
+      font-size: 14px;
+    }
+  }
+}

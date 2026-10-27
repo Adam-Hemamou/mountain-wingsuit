@@ -1,0 +1,167 @@
+// Keyframes from the mockups. Distances come from per-format CSS variables set on .scene.
+@keyframes wsLaunch {
+  0% {
+    transform: translateY(var(--launch-y)) scale(var(--launch-s));
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes wsSway {
+  0%,
+  100% {
+    transform: translateX(-10px) rotate(-3deg);
+  }
+  50% {
+    transform: translateX(10px) rotate(3deg);
+  }
+}
+@keyframes wsStreak {
+  0% {
+    transform: translateY(var(--streak-from)) scaleY(0.4);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(var(--streak-travel)) scaleY(1.6);
+    opacity: 0;
+  }
+}
+@keyframes wsDeploy {
+  0% {
+    transform: translateY(90px) scale(0.25);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(-12px) scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes wsFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(14px) rotate(2deg);
+  }
+}
+@keyframes wsShake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-14px, 9px);
+  }
+  20% {
+    transform: translate(13px, -10px);
+  }
+  30% {
+    transform: translate(-10px, -6px);
+  }
+  40% {
+    transform: translate(9px, 10px);
+  }
+  50% {
+    transform: translate(-6px, 4px);
+  }
+  60% {
+    transform: translate(5px, -5px);
+  }
+  70% {
+    transform: translate(-3px, 2px);
+  }
+  80% {
+    transform: translate(2px, -1px);
+  }
+}
+@keyframes wsFlash {
+  0% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes wsPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+// Crash art takes over from the flight backdrop (which stays underneath).
+@keyframes wsCrashIn {
+  0% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes wsTwinkle {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: rotate(45deg) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: rotate(45deg) scale(1.2);
+  }
+}
+
+.ws-launch {
+  animation: wsLaunch 0.9s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.ws-sway {
+  animation: wsSway 1.8s ease-in-out infinite;
+}
+.ws-streak {
+  animation: wsStreak 0.85s linear infinite;
+}
+.ws-deploy {
+  animation: wsDeploy 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.ws-float {
+  animation: wsFloat 3s ease-in-out infinite;
+}
+.ws-shake {
+  animation: wsShake 0.6s ease-out both;
+}
+.ws-flash {
+  animation: wsFlash 0.8s ease-out both;
+}
+.ws-pop {
+  animation: wsPop 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.ws-crash-in {
+  animation: wsCrashIn 0.35s ease-out both;
+}
+.ws-twinkle {
+  animation: wsTwinkle 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-sway,
+  .ws-streak,
+  .ws-float,
+  .ws-twinkle,
+  .ws-shake {
+    animation: none;
+  }
+}

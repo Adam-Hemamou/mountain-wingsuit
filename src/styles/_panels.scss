@@ -1,0 +1,321 @@
+@use 'tokens' as *;
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: $panel;
+  border: 1px solid $panel-border;
+  min-width: 0;
+
+  @include tablet {
+    gap: 12px;
+    padding: 16px 18px;
+  }
+  @include desktop {
+    padding: 18px 20px;
+  }
+
+  &__title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: $text-label;
+    @include tablet {
+      font-size: 13px;
+    }
+  }
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+// ---------- Stepper (amount + −/+) ----------
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 54px;
+  padding: 5px 5px 5px 14px;
+  border-radius: 12px;
+  background: $field;
+  border: 1px solid $panel-border;
+  transition: opacity 150ms ease;
+  @include tablet {
+    height: 56px;
+    padding: 6px 6px 6px 14px;
+  }
+  @include desktop {
+    padding-left: 16px;
+  }
+
+  &--dimmed {
+    opacity: 0.45;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    outline-offset: 4px;
+    @include tablet {
+      font-size: 21px;
+    }
+    @include desktop {
+      font-size: 22px;
+    }
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+  button {
+    width: 48px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    border: 0;
+    background: $control;
+    color: $text;
+    font-size: 22px;
+    &:hover:not(:disabled) {
+      background: #36334a;
+    }
+  }
+}
+
+// ---------- Chips ----------
+.chips {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  @include desktop {
+    gap: 10px;
+  }
+}
+.chip {
+  height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #fff;
+  background: $control;
+  border: 1px solid $control-border;
+  &--on {
+    background: $accent;
+    border-color: $accent-border;
+    font-weight: 700;
+  }
+  &--square {
+    width: 44px;
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+  &:hover:not(:disabled):not(.chip--on) {
+    background: #36334a;
+  }
+}
+
+// ---------- Switch ----------
+.switch-btn {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #3a3750;
+  transition: background-color 150ms ease;
+  &--on {
+    background: $violet;
+  }
+  &__knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 150ms ease;
+  }
+  &--on &__knob {
+    left: 19px;
+  }
+}
+.panel--auto .panel__head {
+  height: 17px; // the switch overflows its 44px hit area like in the mockup
+}
+
+// ---------- Auto play row ----------
+.autoplay {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  @include tablet-only {
+    gap: 8px;
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: $text;
+    font-size: 14px;
+  }
+  &__count {
+    width: 52px;
+    height: 44px;
+    margin-left: auto;
+    border-radius: 10px;
+    border: 1px solid $panel-border;
+    background: $field;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    @include desktop {
+      width: 56px;
+    }
+    &--off {
+      opacity: 0.4;
+    }
+  }
+  &__unit {
+    font-size: 14px;
+    color: $text-label;
+  }
+}
+
+// ---------- History ----------
+.panel--history {
+  --bar-max: 70px;
+  padding-bottom: 12px;
+  gap: 8px;
+  @include tablet {
+    --bar-max: 86px;
+  }
+  @include desktop {
+    padding-bottom: 14px;
+    gap: 10px;
+  }
+}
+.history__chart,
+.history__labels {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  @include tablet {
+    gap: 8px;
+  }
+  @include desktop {
+    gap: clamp(4px, 0.7vw, 10px);
+  }
+}
+.history__chart {
+  flex: 1;
+  min-height: 96px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: repeating-linear-gradient(to top, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 20px);
+  @include tablet {
+    min-height: 110px;
+    background: repeating-linear-gradient(to top, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 22px);
+  }
+  @include desktop {
+    min-height: 96px;
+    background: repeating-linear-gradient(to top, rgba(255, 255, 255, 0.06) 0 1px, transparent 1px 24px);
+  }
+}
+.history__col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+.history__bar,
+.history__base {
+  width: 70%;
+  @include tablet {
+    width: 64%;
+  }
+  @include desktop {
+    width: 62%;
+  }
+}
+.history__bar {
+  background: $win;
+  border-radius: 3px 3px 0 0;
+  transition: height 300ms ease;
+}
+.history__base {
+  height: 8px;
+  background: $violet;
+  @include tablet {
+    height: 9px;
+  }
+  @include desktop {
+    height: 10px;
+  }
+  &--low {
+    background: $loss;
+  }
+}
+.history__labels span {
+  font-size: clamp(8px, 2.6vw, 10px);
+  letter-spacing: -0.3px;
+  color: $text-label;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  @include tablet {
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+  @include desktop {
+    font-size: clamp(10px, 0.83vw, 12px);
+  }
+}
+
+// ---------- Portrait ----------
+.portrait {
+  display: none;
+  @include tablet {
+    display: block;
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 2px solid $violet;
+    box-shadow: 0 0 18px rgba(139, 92, 246, 0.35);
+    img {
+      // Out of flow so the image ratio never drives the row height.
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 30%;
+    }
+  }
+}

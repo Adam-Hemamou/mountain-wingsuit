@@ -1,0 +1,45 @@
+// Colours & type from the Claude Design mockups.
+$bg: #0e0d18;
+$scene-bg: #1a1438;
+$panel: #191726;
+$panel-border: #2a2738;
+$field: #0f0e18;
+$control: #2a2838;
+$control-border: #34314a;
+$text: #edeaf7;
+$text-muted: #a7a2bd;
+$text-label: #c9c5da;
+$hud-label: #b9a8f0;
+$accent: #7c3aed;
+$accent-border: #b794ff;
+$accent-text: #a27bff;
+$violet: #8b5cf6;
+$cash: #ffc83d;
+$cash-text: #1a1300;
+$win: #2fa866;
+$loss: #e5487a;
+$crash: #ff3b5c;
+$overlay: rgba(16, 12, 34, 0.82);
+
+$font-display: 'Lilita One', 'Space Grotesk', sans-serif;
+$font-body: 'Space Grotesk', system-ui, sans-serif;
+
+// Breakpoints (keep in sync with src/hooks/useBreakpoint.ts)
+$bp-tablet: 768px;
+$bp-desktop: 1200px;
+
+@mixin tablet {
+  @media (min-width: $bp-tablet) {
+    @content;
+  }
+}
+@mixin tablet-only {
+  @media (min-width: $bp-tablet) and (max-width: #{$bp-desktop - 1px}) {
+    @content;
+  }
+}
+@mixin desktop {
+  @media (min-width: $bp-desktop) {
+    @content;
+  }
+}
